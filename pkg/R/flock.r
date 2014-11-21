@@ -12,6 +12,8 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 
+require(methods)
+
 # The file locking interface
 lock = function(path, exclusive=TRUE)
 {
