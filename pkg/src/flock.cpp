@@ -15,7 +15,6 @@
 #include <Rcpp.h>
 
 #include <fcntl.h>
-#include <io.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -23,6 +22,7 @@
 #ifdef WIN32
 #undef Realloc
 #undef Free
+#include <io.h>
 #include <windows.h>
 #include <winbase.h>
 #endif // WIN32
