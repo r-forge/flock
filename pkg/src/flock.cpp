@@ -15,20 +15,43 @@
 #include <Rcpp.h>
 
 #include <fcntl.h>
+#include <io.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
+
+#ifdef WIN32
+#undef Realloc
+#undef Free
+#include <windows.h>
+#include <winbase.h>
+#endif // WIN32
 
 using namespace Rcpp;
 
 void lock(const char * path, bool exclusive, int & descriptor, int & locked)
 {
+#ifdef WIN32
+   descriptor = ::_open(path, O_RDWR|O_CREAT, S_IREAD|S_IWRITE);
+#else
    descriptor = ::open(path, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+#endif // WIN32
    if(descriptor < 0) {
       locked = 0;
       return;
    }
-   
+
+#ifdef WIN32
+   HANDLE handle = (HANDLE)_get_osfhandle(descriptor);
+   OVERLAPPED ov = {0};
+   if(!LockFileEx(handle, exclusive ? LOCKFILE_EXCLUSIVE_LOCK : 0, 0, 1, 0, &ov)) {
+      ::close(descriptor);
+      descriptor = -1;
+      locked = 0;
+      return;
+   }
+#else
    struct flock fl;
-   
    fl.l_type   = exclusive ? F_WRLCK : F_RDLCK; // F_RDLCK, F_WRLCK, F_UNLCK
    fl.l_whence = SEEK_SET;                      // SEEK_SET, SEEK_CUR, SEEK_END
    fl.l_start  = 0;                             // Offset from l_whence
@@ -41,11 +64,18 @@ void lock(const char * path, bool exclusive, int & descriptor, int & locked)
       locked = 0;
       return;
    }
-   
+#endif // WIN32
+
    locked = 1;
 }
 
 void unlock(int & descriptor) {
+#ifdef WIN32
+   HANDLE handle = (HANDLE)_get_osfhandle(descriptor);
+   OVERLAPPED ov = {0};
+   UnlockFileEx(handle, 0, 0, 1, &ov);
+   ::_close(descriptor);
+#else
    struct flock fl;
    
    fl.l_type   = F_UNLCK;
@@ -56,6 +86,8 @@ void unlock(int & descriptor) {
 
    ::fcntl(descriptor, F_SETLK, &fl);
    ::close(descriptor);
+#endif // WIN32
+   
    descriptor = -1;
 }
 
