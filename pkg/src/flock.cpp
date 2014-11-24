@@ -21,19 +21,10 @@ using namespace Rcpp;
 
 void lock(const char * path, bool exclusive, int & descriptor, int & locked)
 {
-   FILE * file = fopen("/home/ivannp/ttt/diag.log", "a");
-   if(file != NULL) {
-      fprintf(file, "%s\n", path);
-   }
-
    descriptor = ::open(path, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
    if(descriptor < 0) {
       locked = 0;
-      goto exit;
-   }
-   
-   if(file != NULL) {
-      fprintf(file, "%d\n", descriptor);
+      return;
    }
    
    struct flock fl;
@@ -48,15 +39,10 @@ void lock(const char * path, bool exclusive, int & descriptor, int & locked)
       ::close(descriptor);
       descriptor = -1;
       locked = 0;
-      goto exit;
+      return;
    }
    
    locked = 1;
-   
-exit:
-   if(file != NULL) {
-      fclose(file);
-   }
 }
 
 void unlock(int & descriptor) {
