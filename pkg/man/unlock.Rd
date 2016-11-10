@@ -10,11 +10,13 @@
 \author{Ivan Popivanov}
 \seealso{\code{\link{lock}}}
 \examples{
+\dontrun{
 require(flock)
 
 file.lock = lock("~/file.lock")
 # Critical section code goes here
 unlock(file.lock)
+}
 }
 \keyword{lock}
 \keyword{unlock}

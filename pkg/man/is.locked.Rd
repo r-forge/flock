@@ -7,6 +7,7 @@
 \arguments{\item{file.lock}{The lock as an object of type \code{FileLock}.}}
 \author{Ivan Popivanov}
 \examples{
+\dontrun{
 require(flock)
 
 file.lock = lock("~/file.lock")
@@ -15,6 +16,7 @@ if(is.locked(file.lock)) {
    print("Got the lock!")
 }
 unlock(file.lock)
+}
 }
 \keyword{lock}
 \keyword{unlock}

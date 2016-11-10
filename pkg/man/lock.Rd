@@ -16,11 +16,13 @@ used for the \code{unlock} call.
 Ivan Popivanov
 }
 \examples{
+\dontrun{
 require(flock)
 
 file.lock = lock("~/file.lock")
 # Critical section code goes here
 unlock(file.lock)
+}
 }
 \keyword{lock}
 \keyword{unlock}
